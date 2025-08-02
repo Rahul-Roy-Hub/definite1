@@ -11,7 +11,11 @@ export async function GET(request: NextRequest) {
 
     switch (action) {
       case 'stats':
-        const stats = serverCache.getStats();
+        // Get basic cache stats
+        const stats = {
+          size: serverCache.getCacheSize(),
+          keys: serverCache.getCacheKeys(),
+        };
         return NextResponse.json({
           success: true,
           stats,
@@ -27,11 +31,16 @@ export async function GET(request: NextRequest) {
         });
 
       default:
+        // Get basic cache stats for default response
+        const defaultStats = {
+          size: serverCache.getCacheSize(),
+          keys: serverCache.getCacheKeys(),
+        };
         return NextResponse.json({
           success: true,
           message: 'Cache management endpoint',
           availableActions: ['stats', 'clear'],
-          stats: serverCache.getStats(),
+          stats: defaultStats,
           timestamp: new Date().toISOString(),
         });
     }
@@ -40,6 +49,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Cache management failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    serverCache.clear();
+    return NextResponse.json({
+      success: true,
+      message: 'Cache cleared successfully',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Cache clear error:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to clear cache',
         message: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

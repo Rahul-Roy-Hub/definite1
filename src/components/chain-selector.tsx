@@ -21,23 +21,22 @@ export function ChainSelector() {
   const { portfolio, isLoading, isUsingFallback, isUsingTestAddress } = usePortfolioWithFallback();
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
 
-  // Create chain data from portfolio or fallback to mock data
-  const chains = portfolio.chains.map(chain => ({
-    id: chainIdToLogoId[chain.chainId] || 'ethereum',
-    name: chain.chainName,
-    tvl: chain.valueFormatted,
-    chainId: chain.chainId,
-    value: chain.value,
-  }));
+  // Create a map of chains with data from portfolio
+  const portfolioChainsMap = new Map(
+    portfolio.chains.map(chain => [chain.chainId, chain])
+  );
 
-  // If no chains have value, show all supported chains with $0
-  const displayChains = chains.length > 0 ? chains : Object.values(SUPPORTED_CHAINS).map(chainId => ({
-    id: chainIdToLogoId[chainId] || 'ethereum',
-    name: CHAIN_INFO[chainId]?.name || 'Unknown',
-    tvl: '$0.00',
-    chainId,
-    value: 0,
-  }));
+  // Always show all supported chains, with $0 for chains without data
+  const displayChains = Object.values(SUPPORTED_CHAINS).map(chainId => {
+    const portfolioChain = portfolioChainsMap.get(chainId);
+    return {
+      id: chainIdToLogoId[chainId] || 'ethereum',
+      name: CHAIN_INFO[chainId]?.name || 'Unknown',
+      tvl: portfolioChain?.valueFormatted || '$0.00',
+      chainId,
+      value: portfolioChain?.value || 0,
+    };
+  });
 
   const handleChainClick = (chainId: number) => {
     setSelectedChain(selectedChain === chainId ? null : chainId);
@@ -114,7 +113,10 @@ export function ChainSelector() {
                     <div className="text-right">
                       <div className="text-white font-bold text-lg">{selected.tvl}</div>
                       <div className="text-slate-400 text-sm">
-                        {((selected.value / portfolio.totalValue) * 100).toFixed(2)}% of portfolio
+                        {selected.value > 0 
+                          ? `${((selected.value / portfolio.totalValue) * 100).toFixed(2)}% of portfolio`
+                          : 'No holdings'
+                        }
                       </div>
                     </div>
                   </div>

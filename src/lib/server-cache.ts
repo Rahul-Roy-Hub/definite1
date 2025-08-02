@@ -1,12 +1,18 @@
-// Simple in-memory cache for API responses
-class ServerCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+  ttl: number;
+}
 
-  set(key: string, data: any, ttlMinutes: number = 2): void {
+class ServerCache {
+  private cache = new Map<string, CacheEntry>();
+  private readonly DEFAULT_TTL = 2 * 60 * 1000; // 2 minutes (reduced from 5 minutes)
+
+  set(key: string, data: any, ttl: number = this.DEFAULT_TTL): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttlMinutes * 60 * 1000, // Convert minutes to milliseconds
+      ttl,
     });
   }
 
@@ -14,7 +20,8 @@ class ServerCache {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
-    if (Date.now() - entry.timestamp > entry.ttl) {
+    const isExpired = Date.now() - entry.timestamp > entry.ttl;
+    if (isExpired) {
       this.cache.delete(key);
       return null;
     }
@@ -34,12 +41,48 @@ class ServerCache {
     this.cache.clear();
   }
 
-  size(): number {
-    // Clean expired entries
+  // Get cache size (number of entries)
+  getCacheSize(): number {
     this.cleanExpired();
     return this.cache.size;
   }
 
+  // Get cache keys
+  getCacheKeys(): string[] {
+    this.cleanExpired();
+    return Array.from(this.cache.keys());
+  }
+
+  // Check if a key exists and is not expired
+  hasValidKey(key: string): boolean {
+    const entry = this.cache.get(key);
+    if (!entry) return false;
+    
+    const isExpired = Date.now() - entry.timestamp > entry.ttl;
+    if (isExpired) {
+      this.cache.delete(key);
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Get cache entry info for debugging
+  getCacheInfo(key: string): { exists: boolean; expired: boolean; age: number } | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+    
+    const age = Date.now() - entry.timestamp;
+    const isExpired = age > entry.ttl;
+    
+    return {
+      exists: true,
+      expired: isExpired,
+      age: age,
+    };
+  }
+
+  // Clean expired entries
   private cleanExpired(): void {
     const now = Date.now();
     const keysToDelete: string[] = [];
@@ -53,24 +96,10 @@ class ServerCache {
     keysToDelete.forEach(key => this.cache.delete(key));
   }
 
-  // Get cache statistics
-  getStats(): { size: number; keys: string[] } {
-    this.cleanExpired();
-    return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
-    };
+  // Generate cache key for portfolio data
+  generatePortfolioKey(address: string, chainIds: string[]): string {
+    return `portfolio:${address}:${chainIds.sort().join(',')}`;
   }
 }
 
-// Global cache instance
 export const serverCache = new ServerCache();
-
-// Helper function to generate cache keys
-export function generateCacheKey(prefix: string, params: Record<string, any>): string {
-  const sortedParams = Object.keys(params)
-    .sort()
-    .map(key => `${key}=${params[key]}`)
-    .join('&');
-  return `${prefix}:${sortedParams}`;
-}

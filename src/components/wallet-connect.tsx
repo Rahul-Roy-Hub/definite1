@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Wallet } from 'lucide-react';
 import { ChainLogo } from '@/components/chain-logo';
 import { type ChainId } from '@/lib/utils';
+import Image from 'next/image';
 
 export function WalletConnect() {
   // Helper function to map wagmi chain names to our chain IDs
@@ -97,9 +98,11 @@ export function WalletConnect() {
                         }}
                       >
                         {chain.iconUrl && (
-                          <img
+                          <Image
                             alt={chain.name ?? 'Chain icon'}
                             src={chain.iconUrl}
+                            width={12}
+                            height={12}
                             style={{ width: 12, height: 12 }}
                           />
                         )}

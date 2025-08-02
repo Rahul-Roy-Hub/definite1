@@ -56,10 +56,11 @@ interface UsePortfolioWithFallbackReturn {
   refetch: () => void;
   isUsingFallback: boolean;
   isUsingTestAddress: boolean;
+  isCached: boolean;
 }
 
 export function usePortfolioWithFallback(): UsePortfolioWithFallbackReturn {
-  const { portfolio, isLoading, error, refetch, isUsingTestAddress } = usePortfolio();
+  const { portfolio, isLoading, error, refetch, isUsingTestAddress, isCached } = usePortfolio();
 
   // Use real data if available, otherwise fall back to mock data
   const effectivePortfolio = portfolio || mockPortfolioData;
@@ -72,5 +73,6 @@ export function usePortfolioWithFallback(): UsePortfolioWithFallbackReturn {
     refetch,
     isUsingFallback,
     isUsingTestAddress,
+    isCached,
   };
 }

@@ -12,7 +12,7 @@ import { usePortfolioWithFallback } from '@/hooks/use-portfolio-with-fallback';
 import { Button } from '@/components/ui/button';
 
 export function Overview() {
-  const { portfolio, isLoading, error, refetch, isUsingFallback, isUsingTestAddress } = usePortfolioWithFallback();
+  const { portfolio, isLoading, error, refetch, isUsingFallback, isUsingTestAddress, isCached } = usePortfolioWithFallback();
 
   const portfolioMetrics = [
     {
@@ -57,6 +57,9 @@ export function Overview() {
           )}
           {isUsingTestAddress && !isUsingFallback && (
             <span className="text-sm text-blue-400">Using test address (burn address)</span>
+          )}
+          {isCached && (
+            <span className="text-sm text-green-400">Cached data</span>
           )}
           {error && (
             <span className="text-sm text-red-400">Error: {error}</span>
