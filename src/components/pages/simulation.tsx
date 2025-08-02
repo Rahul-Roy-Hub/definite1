@@ -16,6 +16,7 @@ export function Simulation() {
   const handleSimulate = () => {
     // Mock simulation result
     setSimulationResult({
+      // @ts-expect-error
       status: 'success',
       gasUsed: '142,456',
       gasPrice: '28 gwei',
@@ -55,7 +56,7 @@ export function Simulation() {
                 className="glass-card border-white/10 bg-white/5 min-h-[120px] text-white"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm text-slate-400">Contract Address (Optional)</label>
               <Input
@@ -66,7 +67,7 @@ export function Simulation() {
               />
             </div>
 
-            <Button 
+            <Button
               onClick={handleSimulate}
               className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
             >
@@ -117,7 +118,7 @@ export function Simulation() {
                   <span className="text-slate-400">Security Score</span>
                   <div className="flex items-center space-x-2">
                     <div className="flex-1 bg-slate-700 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-gradient-to-r from-yellow-500 to-green-500 h-2 rounded-full"
                         style={{ width: '85%' }}
                       />
