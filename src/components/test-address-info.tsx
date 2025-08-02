@@ -40,7 +40,7 @@ export function TestAddressInfo({ isVisible }: TestAddressInfoProps) {
               <span className="text-sm font-medium text-white">Using Test Address</span>
             </div>
             <p className="text-sm text-slate-300 mb-3">
-              Since you don't have a wallet connected or mainnet balance, we're using the burn address 
+              Since you don&apos;t have a wallet connected or mainnet balance, we&apos;re using the burn address 
               <code className="mx-1 px-1 py-0.5 bg-black/20 rounded text-xs font-mono">
                 {formatTestAddress(TEST_ADDRESS)}
               </code>

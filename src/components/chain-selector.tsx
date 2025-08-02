@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ChainLogo } from '@/components/chain-logo';
 import { usePortfolioWithFallback } from '@/hooks/use-portfolio-with-fallback';
 import { CHAIN_INFO, SUPPORTED_CHAINS } from '@/lib/types';
@@ -17,9 +18,54 @@ const chainIdToLogoId: Record<number, ChainId> = {
   [SUPPORTED_CHAINS.BASE]: 'base',
 };
 
-export function ChainSelector() {
+interface ChainSelectorProps {
+  onChainChange?: (chainId: number) => void;
+}
+
+// Skeleton for chain buttons
+function ChainButtonSkeleton() {
+  return (
+    <div className="flex items-center space-x-2 h-auto p-3 border border-white/20 rounded-lg">
+      <Skeleton className="w-5 h-5 rounded" />
+      <div className="text-left space-y-1">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-3 w-12" />
+      </div>
+      <Skeleton className="h-5 w-8 rounded ml-2" />
+    </div>
+  );
+}
+
+// Loading skeleton for chain selector
+function ChainSelectorSkeleton() {
+  return (
+    <div className="glass-card p-6 border-white/10 bg-white/5">
+      <div className="flex justify-between items-center mb-4">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <Skeleton className="h-6 w-16 rounded" />
+      </div>
+      
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <ChainButtonSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ChainSelector({ onChainChange }: ChainSelectorProps = {}) {
   const { portfolio, isLoading, isUsingFallback, isUsingTestAddress } = usePortfolioWithFallback();
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
+
+  if (isLoading) {
+    return <ChainSelectorSkeleton />;
+  }
 
   // Create a map of chains with data from portfolio
   const portfolioChainsMap = new Map(
@@ -40,6 +86,9 @@ export function ChainSelector() {
 
   const handleChainClick = (chainId: number) => {
     setSelectedChain(selectedChain === chainId ? null : chainId);
+    if (onChainChange) {
+      onChainChange(chainId);
+    }
   };
 
   return (
@@ -52,16 +101,6 @@ export function ChainSelector() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          {isUsingFallback && (
-            <Badge variant="outline" className="text-amber-400 border-amber-400/50">
-              Mock Data
-            </Badge>
-          )}
-          {isUsingTestAddress && !isUsingFallback && (
-            <Badge variant="outline" className="text-blue-400 border-blue-400/50">
-              Test Address
-            </Badge>
-          )}
         </div>
       </div>
       

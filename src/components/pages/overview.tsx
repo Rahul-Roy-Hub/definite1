@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Wallet, DollarSign, RefreshCw } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ChainSelector } from '@/components/chain-selector';
 import { TokenBalance } from '@/components/token-balance';
 import { ActivityFeed } from '@/components/activity-feed';
@@ -11,8 +12,58 @@ import { ApiStatusPanel } from '@/components/api-status-panel';
 import { usePortfolioWithFallback } from '@/hooks/use-portfolio-with-fallback';
 import { Button } from '@/components/ui/button';
 
+// Skeleton for metric cards
+function MetricCardSkeleton() {
+  return (
+    <Card className="glass-card border-white/10 bg-white/5">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-4 rounded" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-20 mb-2" />
+        <div className="flex items-center">
+          <Skeleton className="h-3 w-3 mr-1 rounded" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Loading skeleton for overview
+function OverviewSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-10 w-48" />
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-8 w-20 rounded" />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <MetricCardSkeleton key={index} />
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Skeleton className="h-96 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
 export function Overview() {
   const { portfolio, isLoading, error, refetch, isUsingFallback, isUsingTestAddress, isCached } = usePortfolioWithFallback();
+
+  if (isLoading) {
+    return <OverviewSkeleton />;
+  }
 
   const portfolioMetrics = [
     {
