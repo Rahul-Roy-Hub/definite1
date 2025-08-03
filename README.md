@@ -6,7 +6,7 @@ DeFinite1 was born from a vision to empower DAOs, startups and DeFi-savvy indivi
 
 ## 💻 What it does
 
-DeFinite1 helps users seamlessly monitor and manage on‑chain holdings across EVM networks, execute optimized token swaps, automate portfolio rebalancing, schedule recurring transactions, perform cross‑chain transfers and simulate trades to mitigate risks-all while keeping assets under the user’s control.
+DeFinite1 helps users seamlessly monitor and manage on‑chain holdings across EVM networks, execute optimized token swaps, perform cross‑chain transfers and simulate trades to mitigate risks-all while keeping assets under the user’s control.
 
 ## ⚙️ How we built it
 
