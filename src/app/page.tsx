@@ -34,19 +34,21 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">
-            DeFinite1
+      <div className="container mx-auto px-6 py-12">
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-white mb-3">
+            Treasury Dashboard
           </h1>
-          <p className="text-slate-400">
-            Non-custodial multi-chain treasury management dashboard
+          <p className="text-slate-400 text-xl">
+            Non-custodial multi-chain treasury management
           </p>
         </div>
         
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="mb-12">
+          <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
         
-        <div className="mt-8">
+        <div className="space-y-8">
           {renderContent()}
         </div>
       </div>

@@ -6,9 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { mainnet, polygon, optimism, arbitrum, base, sepolia } from 'wagmi/chains';
 import { ChainLogo } from '@/components/chain-logo';
 import { type ChainId } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 export function WalletInfo() {
   const { address, isConnected, chainId, balance } = useWallet();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Helper function to get chain name and id from chainId
   const getChainInfo = (chainId: number) => {
@@ -29,6 +35,20 @@ export function WalletInfo() {
     
     return { name: chainName, id: chainIdKey };
   };
+
+  // Show loading state during SSR and initial client render
+  if (!isMounted) {
+    return (
+      <Card className="bg-black/20 border-white/10">
+        <CardHeader>
+          <CardTitle className="text-white">Wallet Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-slate-400">Loading wallet information...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!isConnected) {
     return (

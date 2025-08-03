@@ -1,47 +1,132 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Wallet, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, DollarSign, RefreshCw } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ChainSelector } from '@/components/chain-selector';
 import { TokenBalance } from '@/components/token-balance';
 import { ActivityFeed } from '@/components/activity-feed';
 import { WalletInfo } from '@/components/wallet-info';
+import { TestAddressInfo } from '@/components/test-address-info';
+import { ApiStatusPanel } from '@/components/api-status-panel';
+import { usePortfolioWithFallback } from '@/hooks/use-portfolio-with-fallback';
+import { Button } from '@/components/ui/button';
+
+// Skeleton for metric cards
+function MetricCardSkeleton() {
+  return (
+    <Card className="glass-card border-white/10 bg-white/5">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-4 rounded" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-20 mb-2" />
+        <div className="flex items-center">
+          <Skeleton className="h-3 w-3 mr-1 rounded" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Loading skeleton for overview
+function OverviewSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-10 w-48" />
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-8 w-20 rounded" />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <MetricCardSkeleton key={index} />
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Skeleton className="h-96 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+}
 
 export function Overview() {
+  const { portfolio, isLoading, error, refetch, isUsingFallback, isUsingTestAddress, isCached } = usePortfolioWithFallback();
+
+  if (isLoading) {
+    return <OverviewSkeleton />;
+  }
+
   const portfolioMetrics = [
     {
       title: 'Total Treasury Value',
-      value: '$2,847,293.42',
-      change: '+12.45%',
+      value: portfolio.totalValueFormatted,
+      change: '+12.45%', // This would come from historical data comparison
       trend: 'up' as const,
       icon: DollarSign,
     },
     {
-      title: 'Active Positions',
-      value: '24',
-      change: '+3',
+      title: 'Active Chains',
+      value: portfolio.chains.filter(chain => chain.value > 0).length.toString(),
+      change: `${portfolio.chains.length} total`,
       trend: 'up' as const,
       icon: Wallet,
     },
     {
-      title: '24h P&L',
-      value: '+$38,492.17',
-      change: '+1.35%',
+      title: 'Largest Position',
+      value: portfolio.chains.length > 0 ? portfolio.chains[0].valueFormatted : '$0.00',
+      change: portfolio.chains.length > 0 ? portfolio.chains[0].chainName : 'No data',
       trend: 'up' as const,
       icon: TrendingUp,
     },
     {
-      title: 'Monthly Yield',
-      value: '14.23%',
-      change: '-2.1%',
-      trend: 'down' as const,
+      title: 'Native Assets',
+      value: portfolio.categories.find(cat => cat.categoryId === 'native')?.valueFormatted || '$0.00',
+      change: 'vs Tokens',
+      trend: 'up' as const,
       icon: TrendingDown,
     },
   ];
 
   return (
     <div className="space-y-8">
-      <ChainSelector />
+      <TestAddressInfo isVisible={isUsingTestAddress && !isUsingFallback} />
+      
+      <div className="flex justify-between items-center">
+        <ChainSelector />
+        <div className="flex items-center space-x-2">
+          {isUsingFallback && (
+            <span className="text-sm text-amber-400">Using mock data</span>
+          )}
+          {isUsingTestAddress && !isUsingFallback && (
+            <span className="text-sm text-blue-400">Using test address (burn address)</span>
+          )}
+          {isCached && (
+            <span className="text-sm text-green-400">Cached data</span>
+          )}
+          {error && (
+            <span className="text-sm text-red-400">Error: {error}</span>
+          )}
+          <Button
+            onClick={refetch}
+            disabled={isLoading}
+            variant="outline"
+            size="sm"
+            className="glass-card border-white/10"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {portfolioMetrics.map((metric, index) => {
@@ -78,6 +163,7 @@ export function Overview() {
         </div>
         <div className="space-y-8">
           <WalletInfo />
+          <ApiStatusPanel />
           <ActivityFeed />
         </div>
       </div>

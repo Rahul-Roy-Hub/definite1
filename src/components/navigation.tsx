@@ -25,8 +25,8 @@ const tabs = [
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
-    <div className="glass-card p-2">
-      <nav className="flex space-x-1">
+    <div className="glass-card border-white/10 bg-white/5 p-3 rounded-xl">
+      <nav className="flex items-center justify-between space-x-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -36,18 +36,21 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
               key={tab.id}
               onClick={() => onTabChange(tab.id as TabType)}
               className={cn(
-                'flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-200',
-                'hover:bg-white/10',
-                isActive && 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30'
+                'flex items-center space-x-3 px-6 py-4 rounded-lg transition-all duration-300',
+                'hover:bg-white/10 hover:scale-105',
+                'focus:outline-none focus:ring-2 focus:ring-cyan-500/50',
+                isActive 
+                  ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 shadow-lg shadow-cyan-500/10' 
+                  : 'border border-transparent hover:border-white/20'
               )}
             >
               <Icon className={cn(
-                'h-4 w-4',
-                isActive ? 'text-cyan-400' : 'text-slate-400'
+                'h-5 w-5 transition-colors duration-200',
+                isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-300'
               )} />
               <span className={cn(
-                'text-sm font-medium',
-                isActive ? 'text-white' : 'text-slate-400'
+                'text-sm font-semibold transition-colors duration-200',
+                isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'
               )}>
                 {tab.label}
               </span>
