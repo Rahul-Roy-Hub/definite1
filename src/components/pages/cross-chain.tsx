@@ -17,6 +17,7 @@ interface QuoteData {
   estimatedFeeUsd: string;
   priceImpact: number;
   recommendedPreset: string;
+  exchangeRate?: string;
   presets: {
     fast: {
       auctionDuration: number;
@@ -167,7 +168,7 @@ export function CrossChain() {
 
   const getBridgeFee = (): string => {
     if (!quote) return '$8.45';
-    return `${quote.estimatedFeeUsd}`;
+    return `$${quote.estimatedFeeUsd}`;
   };
 
   const swapTokens = () => {
@@ -180,45 +181,85 @@ export function CrossChain() {
     setTargetToken(tempToken);
   };
 
+  const createSwapOrder = () => {
+    if (!quote || !amount) return;
+
+    const newOrder = {
+      id: Date.now().toString(),
+      pair: `${sourceToken} → ${targetToken}`,
+      sourceChain: chains.find(c => c.id === sourceChain)?.name || sourceChain,
+      targetChain: chains.find(c => c.id === targetChain)?.name || targetChain,
+      sourceToken,
+      targetToken,
+      amount: `${amount} ${sourceToken}`,
+      receiveAmount: `${getReceiveAmount()} ${targetToken}`,
+      bridgeFee: getBridgeFee(),
+      gasFee: calculateGasFeeUsd(quote.presets[selectedPreset]),
+      priceImpact: quote.priceImpact,
+      exchangeRate: quote.exchangeRate || '0',
+      speed: selectedPreset,
+      estimatedTime: getEstimatedTime(),
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      quoteData: quote
+    };
+
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const existingOrders = JSON.parse(localStorage.getItem('swapOrders') || '[]');
+        const updatedOrders = [newOrder, ...existingOrders];
+        localStorage.setItem('swapOrders', JSON.stringify(updatedOrders));
+
+        setAmount('');
+        setQuote(null);
+
+        alert(`Order created successfully!\n${sourceToken} → ${targetToken}\nAmount: ${amount} ${sourceToken}`);
+      }
+    } catch (error) {
+      console.error('Error saving order:', error);
+      alert('Failed to create order. Please try again.');
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">Cross-Chain Swap</h2>
-        <p className="text-slate-400">Swap tokens seamlessly across different chains using 1inch Fusion+</p>
+    <div className='max-w-2xl mx-auto space-y-6'>
+      <div className='text-center mb-8'>
+        <h2 className='text-2xl font-bold text-white mb-2'>Cross-Chain Swap</h2>
+        <p className='text-slate-400'>Swap tokens seamlessly across different chains using 1inch Fusion+</p>
       </div>
 
-      <Card className="glass-card border-white/10 bg-white/5">
+      <Card className='glass-card border-white/10 bg-white/5'>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Network className="h-5 w-5 mr-2 text-cyan-400" />
+          <CardTitle className='flex items-center justify-between'>
+            <div className='flex items-center'>
+              <Network className='h-5 w-5 mr-2 text-cyan-400' />
               Swap Configuration
             </div>
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onClick={swapTokens}
-              className="text-cyan-400 hover:text-cyan-300"
-              title="Swap tokens and chains"
+              className='text-cyan-400 hover:text-cyan-300'
+              title='Swap tokens and chains'
             >
-              <ArrowUpDown className="h-4 w-4" />
+              <ArrowUpDown className='h-4 w-4' />
             </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm text-slate-400">From</label>
-              <div className="grid grid-cols-2 gap-2">
+        <CardContent className='space-y-6'>
+          <div className='space-y-4'>
+            <div className='space-y-2'>
+              <label className='text-sm text-slate-400'>From</label>
+              <div className='grid grid-cols-2 gap-2'>
                 <Select value={sourceChain} onValueChange={(value) => setSourceChain(value as ChainId)}>
-                  <SelectTrigger className="glass-card border-white/10 bg-white/5">
+                  <SelectTrigger className='glass-card border-white/10 bg-white/5'>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/10">
+                  <SelectContent className='bg-slate-900 border-white/10'>
                     {chains.map((chain) => (
                       <SelectItem key={chain.id} value={chain.id}>
-                        <div className="flex items-center">
-                          <ChainLogo chainId={chain.id} className="w-4 h-4 mr-2" />
+                        <div className='flex items-center'>
+                          <ChainLogo chainId={chain.id} className='w-4 h-4 mr-2' />
                           {chain.name}
                         </div>
                       </SelectItem>
@@ -227,10 +268,10 @@ export function CrossChain() {
                 </Select>
 
                 <Select value={sourceToken} onValueChange={setSourceToken}>
-                  <SelectTrigger className="glass-card border-white/10 bg-white/5">
+                  <SelectTrigger className='glass-card border-white/10 bg-white/5'>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/10">
+                  <SelectContent className='bg-slate-900 border-white/10'>
                     {getAvailableTokens(sourceChain).map((token) => (
                       <SelectItem key={token} value={token}>{token}</SelectItem>
                     ))}
@@ -239,18 +280,18 @@ export function CrossChain() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-slate-400">To</label>
-              <div className="grid grid-cols-2 gap-2">
+            <div className='space-y-2'>
+              <label className='text-sm text-slate-400'>To</label>
+              <div className='grid grid-cols-2 gap-2'>
                 <Select value={targetChain} onValueChange={(value) => setTargetChain(value as ChainId)}>
-                  <SelectTrigger className="glass-card border-white/10 bg-white/5">
+                  <SelectTrigger className='glass-card border-white/10 bg-white/5'>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/10">
+                  <SelectContent className='bg-slate-900 border-white/10'>
                     {chains.map((chain) => (
                       <SelectItem key={chain.id} value={chain.id}>
-                        <div className="flex items-center">
-                          <ChainLogo chainId={chain.id} className="w-4 h-4 mr-2" />
+                        <div className='flex items-center'>
+                          <ChainLogo chainId={chain.id} className='w-4 h-4 mr-2' />
                           {chain.name}
                         </div>
                       </SelectItem>
@@ -259,10 +300,10 @@ export function CrossChain() {
                 </Select>
 
                 <Select value={targetToken} onValueChange={setTargetToken}>
-                  <SelectTrigger className="glass-card border-white/10 bg-white/5">
+                  <SelectTrigger className='glass-card border-white/10 bg-white/5'>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/10">
+                  <SelectContent className='bg-slate-900 border-white/10'>
                     {getAvailableTokens(targetChain).map((token) => (
                       <SelectItem key={token} value={token}>{token}</SelectItem>
                     ))}
@@ -272,54 +313,54 @@ export function CrossChain() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm text-slate-400">Amount</label>
-            <div className="glass-card p-4 border-white/10">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-400">You pay</span>
-                <span className="text-sm text-slate-400">Balance: 5,247.82 {sourceToken}</span>
+          <div className='space-y-2'>
+            <label className='text-sm text-slate-400'>Amount</label>
+            <div className='glass-card p-4 border-white/10'>
+              <div className='flex items-center justify-between mb-2'>
+                <span className='text-sm text-slate-400'>You pay</span>
+                <span className='text-sm text-slate-400'>Balance: 5,247.82 {sourceToken}</span>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-white font-semibold">
-                  <span className="text-lg">{sourceToken}</span>
+              <div className='flex items-center space-x-4'>
+                <div className='flex items-center space-x-2 text-white font-semibold'>
+                  <span className='text-lg'>{sourceToken}</span>
                 </div>
                 <Input
-                  placeholder="0.0"
+                  placeholder='0.0'
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="border-0 bg-transparent text-xl font-semibold text-white placeholder:text-slate-500 focus-visible:ring-0 text-right"
+                  className='border-0 bg-transparent text-xl font-semibold text-white placeholder:text-slate-500 focus-visible:ring-0 text-right'
                 />
                 {isLoadingQuote && (
-                  <RefreshCw className="h-4 w-4 text-cyan-400 animate-spin" />
+                  <RefreshCw className='h-4 w-4 text-cyan-400 animate-spin' />
                 )}
               </div>
-              <div className="flex justify-end mt-2 text-sm">
-                <span className="text-slate-400">
+              <div className='flex justify-end mt-2 text-sm'>
+                <span className='text-slate-400'>
                   {quote?.prices?.usd?.srcToken ?
-                    `≈ ${(parseFloat(amount || '0') * parseFloat(quote.prices.usd.srcToken)).toFixed(2)}` :
+                    `≈ $${(parseFloat(amount || '0') * parseFloat(quote.prices.usd.srcToken)).toFixed(2)}` :
                     '≈ $0.00'
                   }
                 </span>
               </div>
             </div>
 
-            <div className="glass-card p-4 border-white/10 mt-2">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-400">You receive</span>
-                <span className="text-sm text-slate-400">On {chains.find(c => c.id === targetChain)?.name}</span>
+            <div className='glass-card p-4 border-white/10 mt-2'>
+              <div className='flex items-center justify-between mb-2'>
+                <span className='text-sm text-slate-400'>You receive</span>
+                <span className='text-sm text-slate-400'>On {chains.find(c => c.id === targetChain)?.name}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-white font-semibold">
-                  <span className="text-lg">{targetToken}</span>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center space-x-2 text-white font-semibold'>
+                  <span className='text-lg'>{targetToken}</span>
                 </div>
-                <div className="text-xl font-semibold text-green-400">
+                <div className='text-xl font-semibold text-green-400'>
                   {getReceiveAmount()}
                 </div>
               </div>
-              <div className="flex justify-end mt-2 text-sm">
-                <span className="text-slate-400">
+              <div className='flex justify-end mt-2 text-sm'>
+                <span className='text-slate-400'>
                   {quote?.prices?.usd?.dstToken ?
-                    `≈ ${(parseFloat(getReceiveAmount()) * parseFloat(quote.prices.usd.dstToken)).toFixed(2)}` :
+                    `≈ $${(parseFloat(getReceiveAmount()) * parseFloat(quote.prices.usd.dstToken)).toFixed(2)}` :
                     '≈ $0.00'
                   }
                 </span>
@@ -328,9 +369,9 @@ export function CrossChain() {
           </div>
 
           {quote && (
-            <div className="space-y-2">
-              <label className="text-sm text-slate-400">Transfer Speed</label>
-              <div className="grid grid-cols-3 gap-2">
+            <div className='space-y-2'>
+              <label className='text-sm text-slate-400'>Transfer Speed</label>
+              <div className='grid grid-cols-3 gap-2'>
                 {Object.entries(quote.presets).map(([preset, data]) => (
                   <button
                     key={preset}
@@ -340,8 +381,8 @@ export function CrossChain() {
                       : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/20'
                       }`}
                   >
-                    <div className="font-semibold capitalize">{preset}</div>
-                    <div className="text-xs mt-1">{formatDuration(data.auctionDuration)}</div>
+                    <div className='font-semibold capitalize'>{preset}</div>
+                    <div className='text-xs mt-1'>{formatDuration(data.auctionDuration)}</div>
                   </button>
                 ))}
               </div>
@@ -349,69 +390,70 @@ export function CrossChain() {
           )}
 
           {quoteError && (
-            <div className="glass-card p-4 border-red-500/20 bg-red-500/5">
-              <div className="flex items-center text-red-400">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                <span className="text-sm">{quoteError}</span>
+            <div className='glass-card p-4 border-red-500/20 bg-red-500/5'>
+              <div className='flex items-center text-red-400'>
+                <AlertCircle className='h-4 w-4 mr-2' />
+                <span className='text-sm'>{quoteError}</span>
               </div>
             </div>
           )}
 
-          <div className="glass-card p-4 border-white/10 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-white">Transfer Summary</h3>
+          {/* Transfer Summary */}
+          <div className='glass-card p-4 border-white/10 space-y-3'>
+            <div className='flex items-center justify-between'>
+              <h3 className='font-semibold text-white'>Transfer Summary</h3>
               {quote && (
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant='ghost'
+                  size='sm'
                   onClick={fetchQuote}
                   disabled={isLoadingQuote}
-                  className="text-cyan-400 hover:text-cyan-300"
+                  className='text-cyan-400 hover:text-cyan-300'
                 >
                   <RefreshCw className={`h-4 w-4 ${isLoadingQuote ? 'animate-spin' : ''}`} />
                 </Button>
               )}
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400 flex items-center">
-                <Clock className="h-4 w-4 mr-1" />
+            <div className='flex justify-between text-sm'>
+              <span className='text-slate-400 flex items-center'>
+                <Clock className='h-4 w-4 mr-1' />
                 Estimated Time
               </span>
-              <span className="text-white">{getEstimatedTime()}</span>
+              <span className='text-white'>{getEstimatedTime()}</span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400 flex items-center">
-                <DollarSign className="h-4 w-4 mr-1" />
+            <div className='flex justify-between text-sm'>
+              <span className='text-slate-400 flex items-center'>
+                <DollarSign className='h-4 w-4 mr-1' />
                 Bridge Fee
               </span>
-              <span className="text-white">{getBridgeFee()}</span>
+              <span className='text-white'>{getBridgeFee()}</span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Gas Fee</span>
-              <span className="text-white">
+            <div className='flex justify-between text-sm'>
+              <span className='text-slate-400'>Gas Fee</span>
+              <span className='text-white'>
                 {quote ? calculateGasFeeUsd(quote.presets[selectedPreset]) : '~$15.23'}
               </span>
             </div>
 
             {quote && quote.priceImpact > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Price Impact</span>
+              <div className='flex justify-between text-sm'>
+                <span className='text-slate-400'>Price Impact</span>
                 <span className={`${quote.priceImpact > 5 ? 'text-red-400' : 'text-yellow-400'}`}>
                   {quote.priceImpact.toFixed(2)}%
                 </span>
               </div>
             )}
 
-            <div className="border-t border-white/10 pt-2">
-              <div className="flex justify-between font-semibold">
-                <span className="text-white">You&apos;ll Receive</span>
-                <span className="text-green-400">{getReceiveAmount()} {targetToken}</span>
+            <div className='border-t border-white/10 pt-2'>
+              <div className='flex justify-between font-semibold'>
+                <span className='text-white'>You&apos;ll Receive</span>
+                <span className='text-green-400'>{getReceiveAmount()} {targetToken}</span>
               </div>
               {sourceToken !== targetToken && (
-                <div className="text-xs text-slate-400 mt-1">
+                <div className='text-xs text-slate-400 mt-1'>
                   Swapping {sourceToken} → {targetToken} across chains
                 </div>
               )}
@@ -419,12 +461,13 @@ export function CrossChain() {
           </div>
 
           <Button
-            className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white h-12 text-lg font-semibold disabled:opacity-50"
+            className='w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white h-12 text-lg font-semibold disabled:opacity-50'
             disabled={!quote || isLoadingQuote || (sourceChain === targetChain && sourceToken === targetToken) || !amount || parseFloat(amount) <= 0}
+            onClick={createSwapOrder}
           >
-            <ArrowRight className="h-5 w-5 mr-2" />
+            <ArrowRight className='h-5 w-5 mr-2' />
             {isLoadingQuote ? 'Getting Quote...' :
-              sourceToken === targetToken ? 'Start Transfer' : `Swap ${sourceToken} to ${targetToken}`}
+              sourceToken === targetToken ? 'Create Transfer Order' : `Create Swap Order`}
           </Button>
         </CardContent>
       </Card>

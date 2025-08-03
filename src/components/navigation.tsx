@@ -18,7 +18,7 @@ interface NavigationProps {
 const tabs = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
   { id: 'swaps', label: 'Swaps', icon: ArrowLeftRight },
-  { id: 'schedules', label: 'Orders Placed', icon: Calendar },
+  { id: 'orders-placed', label: 'Orders Placed', icon: Calendar },
   { id: 'cross-chain', label: 'Cross-chain', icon: Network },
   { id: 'simulation', label: 'Simulation', icon: Shield },
 ] as const;
