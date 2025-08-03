@@ -2,12 +2,12 @@
 
 import { cn } from '@/lib/utils';
 import { TabType } from '@/app/page';
-import { 
-  BarChart3, 
-  ArrowLeftRight, 
-  Calendar, 
-  Network, 
-  Shield 
+import {
+  BarChart3,
+  ArrowLeftRight,
+  Calendar,
+  Network,
+  Shield
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -18,7 +18,7 @@ interface NavigationProps {
 const tabs = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
   { id: 'swaps', label: 'Swaps', icon: ArrowLeftRight },
-  { id: 'schedules', label: 'Schedules', icon: Calendar },
+  { id: 'schedules', label: 'Orders Placed', icon: Calendar },
   { id: 'cross-chain', label: 'Cross-chain', icon: Network },
   { id: 'simulation', label: 'Simulation', icon: Shield },
 ] as const;
@@ -30,7 +30,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          
+
           return (
             <button
               key={tab.id}
@@ -39,8 +39,8 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                 'flex items-center space-x-3 px-6 py-4 rounded-lg transition-all duration-300',
                 'hover:bg-white/10 hover:scale-105',
                 'focus:outline-none focus:ring-2 focus:ring-cyan-500/50',
-                isActive 
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 shadow-lg shadow-cyan-500/10' 
+                isActive
+                  ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
                   : 'border border-transparent hover:border-white/20'
               )}
             >

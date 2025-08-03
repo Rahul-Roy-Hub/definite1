@@ -9,7 +9,7 @@ import { CrossChain } from '@/components/pages/cross-chain';
 import { Simulation } from '@/components/pages/simulation';
 import { Header } from '@/components/header';
 
-export type TabType = 'overview' | 'swaps' | 'schedules' | 'cross-chain' | 'simulation';
+export type TabType = 'overview' | 'swaps' | 'orders-placed' | 'cross-chain' | 'simulation';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -20,7 +20,7 @@ export default function Home() {
         return <Overview />;
       case 'swaps':
         return <Swaps />;
-      case 'schedules':
+      case 'orders-placed':
         return <Schedules />;
       case 'cross-chain':
         return <CrossChain />;

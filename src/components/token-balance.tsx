@@ -20,13 +20,13 @@ function TokenCardSkeleton() {
           <Skeleton className="h-3 w-20" />
         </div>
       </div>
-      
+
       <div className="text-right space-y-2">
         <Skeleton className="h-4 w-20 ml-auto" />
         <Skeleton className="h-3 w-16 ml-auto" />
         <Skeleton className="h-3 w-12 ml-auto" />
       </div>
-      
+
       <div className="text-right space-y-2">
         <Skeleton className="h-4 w-16 ml-auto" />
         <Skeleton className="h-3 w-12 ml-auto" />
@@ -53,7 +53,7 @@ function TokenBalanceSkeleton() {
               <TokenCardSkeleton key={index} />
             ))}
           </div>
-          
+
           <div className="pt-4 border-t border-white/10 bg-black/20 backdrop-blur-sm rounded-lg p-4">
             <div className="flex justify-between items-center">
               <Skeleton className="h-4 w-24" />
@@ -95,7 +95,7 @@ export function TokenBalance() {
   const tokens = balanceData?.tokens || [];
 
   return (
-    <Card className="glass-card border-white/10 bg-white/5">
+    <Card className="glass-card border-white/10 bg-white/5 h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Token Holdings</CardTitle>
@@ -106,47 +106,46 @@ export function TokenBalance() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="flex flex-col flex-1 overflow-hidden">
         {tokens.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">
+          <div className="flex flex-1 items-center justify-center text-slate-400">
             No tokens found on this chain
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="max-h-80 overflow-y-auto space-y-4 pr-2">
+          <div className="flex flex-col flex-1">
+            {/* Scrollable token list */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
               {tokens.map((token) => (
-                                        <div key={`${token.address}-${token.chainId}`} className="grid grid-cols-3 gap-4 p-4 glass-card border-white/10 rounded-lg">
+                <div
+                  key={`${token.address}-${token.chainId}`}
+                  className="grid grid-cols-3 gap-4 p-4 glass-card border-white/10 rounded-lg"
+                >
+                  {/* Token Info */}
                   <div className="flex items-center space-x-4">
-                                    {token.logoURI ? (
-                  <Image
-                    src={token.logoURI}
-                    alt={token.symbol || 'Token'}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{(token.symbol || 'T').slice(0, 2)}</span>
-                  </div>
-                )}
+                    {token.logoURI ? (
+                      <Image
+                        src={token.logoURI}
+                        alt={token.symbol || 'Token'}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">{(token.symbol || 'T').slice(0, 2)}</span>
+                      </div>
+                    )}
                     <div>
-                                              <div className="font-semibold text-white">{token.symbol || 'Unknown'}</div>
-                        <div className="text-sm text-slate-400">{token.name || 'Unknown Token'}</div>
-                        {token.chainName && (
-                          <div className="text-xs text-blue-400">
-                            {token.chainName}
-                          </div>
-                        )}
-                        {token.tags && token.tags.length > 0 && (
-                          <div className="text-xs text-slate-500">
-                            {token.tags.slice(0, 2).join(', ')}
-                            {token.tags.length > 2 && '...'}
-                          </div>
-                        )}
+                      <div className="font-semibold text-white">{token.symbol || 'Unknown'}</div>
+                      <div className="text-sm text-slate-400">{token.name || 'Unknown Token'}</div>
+                      {token.chainName && (
+                        <div className="text-xs text-blue-400">{token.chainName}</div>
+                      )}
                     </div>
                   </div>
-                  
+
+                  {/* Balance */}
                   <div className="text-right space-y-1">
                     <div className="font-semibold text-white">{token.balanceFormatted}</div>
                     <div className="text-sm text-slate-400">
@@ -154,24 +153,26 @@ export function TokenBalance() {
                     </div>
                     {token.priceChange24h !== undefined && token.priceChange24h !== 0 && (
                       <div className={`text-xs ${token.priceChange24h > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {token.priceChange24h > 0 ? '+' : ''}{token.priceChange24h.toFixed(2)}% (24h)
+                        {token.priceChange24h > 0 ? '+' : ''}
+                        {token.priceChange24h.toFixed(2)}% (24h)
                       </div>
                     )}
                   </div>
-                  
+
+                  {/* Value */}
                   <div className="text-right space-y-1">
                     <div className="font-semibold text-white">{token.valueFormatted}</div>
-                                                <div className="text-sm text-slate-400">
-                              {token.value > 0 && balanceData && balanceData.totalValue > 0 ? 
-                                `${((token.value / balanceData.totalValue) * 100).toFixed(2)}%` : 
-                                '0%'
-                              }
-                            </div>
+                    <div className="text-sm text-slate-400">
+                      {token.value > 0 && balanceData && balanceData.totalValue > 0
+                        ? `${((token.value / balanceData.totalValue) * 100).toFixed(2)}%`
+                        : '0%'}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-            
+
+            {/* Footer (Total Value) fixed at bottom */}
             {balanceData && balanceData.totalValue > 0 && (
               <div className="pt-4 border-t border-white/10 bg-black/20 backdrop-blur-sm rounded-lg p-4">
                 <div className="flex justify-between items-center">
@@ -184,5 +185,6 @@ export function TokenBalance() {
         )}
       </CardContent>
     </Card>
+
   );
 }

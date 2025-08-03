@@ -501,13 +501,13 @@ export function Swaps() {
               )}
             </div>
           )}
-
           <div className='space-y-2'>
             <label className='text-sm text-slate-400'>From</label>
             <div className='glass-card p-4 border-white/10'>
               <div className='flex items-center justify-between'>
                 <Input
                   placeholder='0.0'
+                  type='number'
                   value={fromAmount}
                   onChange={(e) => setFromAmount(e.target.value)}
                   className='border-0 bg-transparent text-2xl font-semibold text-white placeholder:text-slate-500 focus-visible:ring-0'
@@ -564,6 +564,7 @@ export function Swaps() {
                     placeholder='0.0'
                     value={toAmount}
                     readOnly
+                    type='number'
                     className='border-0 bg-transparent text-2xl font-semibold text-white placeholder:text-slate-500 focus-visible:ring-0'
                   />
                 </div>

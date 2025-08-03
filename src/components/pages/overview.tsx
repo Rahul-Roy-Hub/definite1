@@ -42,13 +42,13 @@ function OverviewSkeleton() {
           <Skeleton className="h-8 w-20 rounded" />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, index) => (
           <MetricCardSkeleton key={index} />
         ))}
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Skeleton className="h-96 w-full rounded-lg" />
         <Skeleton className="h-96 w-full rounded-lg" />
@@ -99,7 +99,7 @@ export function Overview() {
   return (
     <div className="space-y-8">
       <TestAddressInfo isVisible={isUsingTestAddress && !isUsingFallback} />
-      
+
       <div className="flex justify-between items-center">
         <ChainSelector />
         <div className="flex items-center space-x-2">
@@ -127,7 +127,7 @@ export function Overview() {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {portfolioMetrics.map((metric, index) => {
           const Icon = metric.icon;
@@ -141,9 +141,8 @@ export function Overview() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">{metric.value}</div>
-                <div className={`text-xs flex items-center mt-1 ${
-                  metric.trend === 'up' ? 'text-green-400' : 'text-red-400'
-                }`}>
+                <div className={`text-xs flex items-center mt-1 ${metric.trend === 'up' ? 'text-green-400' : 'text-red-400'
+                  }`}>
                   {metric.trend === 'up' ? (
                     <TrendingUp className="h-3 w-3 mr-1" />
                   ) : (
@@ -164,9 +163,9 @@ export function Overview() {
         <div className="space-y-8">
           <WalletInfo />
           <ApiStatusPanel />
-          <ActivityFeed />
         </div>
       </div>
+      <ActivityFeed />
     </div>
   );
 }
