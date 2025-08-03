@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
     if (gasLimit !== '100000') queryParams.append('gasLimit', gasLimit);
 
     const fullUrl = `${url}?${queryParams.toString()}`;
-    // console.log('Calling 1inch swap API:', fullUrl);
+    console.log('Calling 1inch swap API:', fullUrl);
+    console.log('API Key present:', !!process.env.ONEINCH_API_KEY);
 
     const response = await fetch(fullUrl, {
       method: 'GET',
@@ -62,13 +63,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // console.log('1inch swap API response status:', response.status);
+    console.log('1inch swap API response status:', response.status);
 
     const responseText = await response.text();
-    // console.log('Raw swap response:', responseText);
+    console.log('Raw swap response:', responseText);
 
     if (!response.ok) {
-      // console.error('1inch swap API error response:', responseText);
+      console.error('1inch swap API error response:', responseText);
       return NextResponse.json(
         { error: `1inch API error: ${response.status}`, details: responseText },
         { status: response.status }
